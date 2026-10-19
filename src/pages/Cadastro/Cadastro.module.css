@@ -1,0 +1,10 @@
+.container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background-color: var(--bg-light); }
+.cardWrapper { width: 100%; max-width: 440px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.logoBox { margin-bottom: 8px; }
+.formCard { width: 100%; }
+.headerText { text-align: center; margin-bottom: 24px; }
+.headerText h2 { color: var(--primary-blue); font-size: 1.5rem; font-weight: 700; }
+.headerText p { color: var(--text-muted); font-size: 0.9rem; }
+.form { display: flex; flex-direction: column; gap: 16px; }
+.footerLink { text-align: center; margin-top: 20px; font-size: 0.9rem; color: var(--text-muted); }
+.link { color: var(--terracotta); font-weight: 600; }

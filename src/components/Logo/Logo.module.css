@@ -1,0 +1,8 @@
+.logoWrapper { display: inline-flex; align-items: center; gap: 10px; user-select: none; }
+.iconBadge { background: linear-gradient(135deg, var(--primary-blue), #1A294A); color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 12px; box-shadow: 0 4px 10px rgba(45, 67, 115, 0.25); }
+.textWrapper { display: flex; align-items: baseline; font-family: var(--font-gamer); font-weight: 800; letter-spacing: -0.5px; }
+.senaiText { color: var(--primary-blue); }
+.goText { color: var(--terracotta); font-style: italic; }
+.small .iconBadge { width: 32px; height: 32px; } .small .icon { width: 18px; height: 18px; } .small .textWrapper { font-size: 1.2rem; }
+.medium .iconBadge { width: 40px; height: 40px; } .medium .icon { width: 22px; height: 22px; } .medium .textWrapper { font-size: 1.6rem; }
+.large .iconBadge { width: 52px; height: 52px; } .large .icon { width: 30px; height: 30px; } .large .textWrapper { font-size: 2.2rem; }

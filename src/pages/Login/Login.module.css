@@ -1,0 +1,12 @@
+.container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background-color: var(--bg-light); }
+.cardWrapper { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.logoHeader { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.gamerSubtitle { font-family: var(--font-gamer); font-size: 0.75rem; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; }
+.loginCard { width: 100%; }
+.headerText { text-align: center; margin-bottom: 24px; }
+.headerText h2 { color: var(--primary-blue); font-size: 1.5rem; font-weight: 700; }
+.headerText p { color: var(--text-muted); font-size: 0.9rem; }
+.form { display: flex; flex-direction: column; gap: 16px; }
+.errorBox { background-color: #FEF2F2; color: #EF4444; padding: 10px; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 500; text-align: center; }
+.footerText { text-align: center; margin-top: 20px; font-size: 0.9rem; color: var(--text-muted); }
+.link { color: var(--terracotta); font-weight: 600; }

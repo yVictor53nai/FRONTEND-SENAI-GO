@@ -1,0 +1,2 @@
+.visitedBadge { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 20px; background-color: var(--success-bg); color: #065F46; border: 1.5px solid #A7F3D0; border-radius: var(--radius-md); font-weight: 700; font-size: 0.95rem; user-select: none; }
+.checkIcon { color: var(--success); }

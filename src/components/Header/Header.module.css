@@ -1,0 +1,32 @@
+.header { background-color: #ffffff; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); }
+.container { max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.leftSection { display: flex; align-items: center; }
+.centerSection { display: flex; align-items: center; gap: 20px; }
+.greetingBox { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: var(--primary-blue); background-color: rgba(45, 67, 115, 0.06); padding: 6px 14px; border-radius: 20px; }
+.userIcon { color: var(--primary-blue); }
+.badgeVisitas { display: flex; align-items: center; gap: 6px; font-size: 0.88rem; color: var(--text-muted); background-color: var(--bg-light); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-color); }
+.badgeIcon { color: var(--terracotta); }
+.rightSection { display: flex; align-items: center; gap: 16px; }
+.pointsPill { display: flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #FEF3C7, #FDE68A); color: #B45309; padding: 6px 14px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; border: 1px solid #FCD34D; }
+.trophyIcon { color: #D97706; }
+.navLinks { display: flex; align-items: center; gap: 8px; }
+.navBtn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; color: var(--primary-blue); transition: all 0.2s; }
+.navBtn:hover, .navBtn.active { background-color: var(--primary-blue); color: #ffffff; }
+.logoutBtn { display: flex; align-items: center; justify-content: center; padding: 8px; border-radius: var(--radius-md); border: none; background-color: transparent; color: #EF4444; cursor: pointer; transition: all 0.2s; }
+.logoutBtn:hover { background-color: #FEF2F2; }
+@media (max-width: 768px) {
+  .container { flex-wrap: wrap; padding: 10px 16px; gap: 10px; }
+  .centerSection { order: 3; width: 100%; gap: 8px; }
+  .greetingBox { flex: 1; min-width: 0; font-size: 0.82rem; padding: 5px 12px; }
+  .greetingBox span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .badgeVisitas { white-space: nowrap; font-size: 0.8rem; padding: 5px 12px; }
+  .rightSection { gap: 8px; }
+  .pointsPill { white-space: nowrap; padding: 5px 12px; font-size: 0.85rem; }
+  .navLinks { gap: 4px; }
+  .navBtn { padding: 8px; }
+  .navBtn span { display: none; }
+}
+
+@media (max-width: 400px) {
+  .badgeLabel { display: none; }
+}

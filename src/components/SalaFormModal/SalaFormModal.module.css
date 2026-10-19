@@ -1,0 +1,13 @@
+.form { display: flex; flex-direction: column; gap: 14px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label { font-size: 0.85rem; font-weight: 600; color: var(--primary-blue); }
+.select { height: 46px; padding: 0 12px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background-color: #ffffff; color: var(--primary-blue); font-size: 0.95rem; }
+.checkbox { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--primary-blue); cursor: pointer; }
+.actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 4px; }
+
+@media (max-width: 480px) {
+  .row { grid-template-columns: 1fr; }
+  .actions { flex-direction: column-reverse; }
+  .actions button { width: 100%; }
+}

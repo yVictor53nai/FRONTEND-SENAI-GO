@@ -1,0 +1,37 @@
+.pageContainer { min-height: 100vh; background-color: var(--bg-light); }
+.mainContent { max-width: 1200px; margin: 0 auto; padding: 32px 24px; display: flex; flex-direction: column; gap: 32px; }
+.bannerLoja { background: linear-gradient(135deg, var(--terracotta), #8C2F12); border-radius: var(--radius-lg); padding: 32px; color: #ffffff; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.tagLoja { display: inline-flex; align-items: center; gap: 6px; background-color: rgba(255, 255, 255, 0.18); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 12px; }
+.saldoPill { background-color: #ffffff; color: var(--terracotta); padding: 12px 20px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-soft); }
+.productsGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
+.productCard { display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
+.imagePlaceholder { height: 120px; background-color: var(--bg-light); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.emojiImg { font-size: 3rem; }
+.productName { font-size: 1.1rem; font-weight: 700; color: var(--primary-blue); }
+.pointsCost { display: flex; align-items: center; justify-content: center; gap: 6px; color: #D97706; font-weight: 700; margin: 8px 0 16px 0; }
+.stockInfo { color: var(--text-muted); }
+.errorBox { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.historySection { display: flex; flex-direction: column; gap: 12px; }
+.sectionTitle { font-size: 1.15rem; font-weight: 700; color: var(--primary-blue); }
+.emptyText { color: var(--text-muted); font-size: 0.9rem; }
+.historyList { list-style: none; display: flex; flex-direction: column; gap: 10px; padding: 0; margin: 0; }
+.historyItem { display: flex; align-items: center; gap: 14px; background-color: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 16px; }
+.historyEmoji { font-size: 1.6rem; }
+.historyInfo { flex: 1; display: flex; flex-direction: column; color: var(--primary-blue); }
+.historyInfo small { color: var(--text-muted); }
+.historyPoints { color: #D97706; font-weight: 700; }
+@media (max-width: 768px) {
+  .mainContent { padding: 20px 16px; gap: 24px; }
+  .bannerLoja { flex-direction: column; align-items: stretch; padding: 24px 20px; gap: 20px; }
+  .bannerLoja h2 { font-size: 1.5rem; }
+  .saldoPill { justify-content: center; }
+  .productsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .productsGrid .productCard { padding: 12px; min-width: 0; }
+  .imagePlaceholder { height: 84px; margin-bottom: 12px; }
+  .emojiImg { font-size: 2.4rem; }
+  .productName { font-size: 0.95rem; }
+}
+
+@media (max-width: 380px) {
+  .productsGrid { grid-template-columns: 1fr; }
+}
