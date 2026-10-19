@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import api from '../services/api'; // Ajuste o caminho da sua API de acordo com o seu projeto
+import api from '../services/api';
 
 const ProgressoContext = createContext({});
 
@@ -14,7 +14,6 @@ export const ProgressoProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      // Busca as salas e as visitas cadastradas no backend
       const [resSalas, resVisitas] = await Promise.all([
         api.get('/salas').catch(() => ({ data: [] })),
         api.get('/visitas/locais').catch(() => ({ data: [] })),
@@ -23,7 +22,7 @@ export const ProgressoProvider = ({ children }) => {
       const listaSalas = Array.isArray(resSalas.data) ? resSalas.data : [];
       const listaVisitas = Array.isArray(resVisitas.data) ? resVisitas.data : [];
 
-      // Mapeia e normaliza os IDs das salas visitadas para Strings simples
+      // Mapeia e garante IDs em formato de String simples
       const idsVisitados = listaVisitas.map((v) =>
         String(v.sala_id ?? v.salaId ?? v.id_sala ?? v.id ?? '')
       ).filter(Boolean);
@@ -32,7 +31,7 @@ export const ProgressoProvider = ({ children }) => {
       setVisitedRooms(idsVisitados);
     } catch (err) {
       console.error('[ERRO AO CARREGAR PROGRESSO]:', err);
-      setError('Não foi possível carregar seus dados de visita.');
+      setError('Não foi possível carregar os dados de visita.');
     } finally {
       setLoading(false);
     }
@@ -42,13 +41,9 @@ export const ProgressoProvider = ({ children }) => {
     try {
       const response = await api.post('/visitas/registrarLocal', { salaId });
       
-      // Atualiza o estado local imediatamente
-      setVisitedRooms((prev) => {
-        const idString = String(salaId);
-        return prev.includes(idString) ? prev : [...prev, idString];
-      });
+      const idString = String(salaId);
+      setVisitedRooms((prev) => (prev.includes(idString) ? prev : [...prev, idString]));
 
-      // Recarrega do servidor para garantir sincronia com a pontuação
       await carregarDados();
       return response.data;
     } catch (err) {
