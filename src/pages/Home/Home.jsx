@@ -88,7 +88,14 @@ const Home = () => {
     setFeedback({ variant: 'info', message: 'QR Code lido! Registrando sua visita...' });
 
     try {
+      // 1. Registra no backend
       await registrarVisita({ salaId: scannedRoomId });
+
+      // 2. Recarrega as visitas imediatamente para atualizar o estado visitedRooms e bloquear o botão
+      if (typeof recarregar === 'function') {
+        await recarregar();
+      }
+
       setFeedback({
         variant: 'success',
         message: `Visita registrada com sucesso! +${salaLida.pontos || 5} pontos.`,
@@ -97,6 +104,10 @@ const Home = () => {
       // Fecha o modal do scanner após o tempo de delay
       closeTimer.current = setTimeout(handleCloseScanner, CLOSE_DELAY_MS);
     } catch (err) {
+      // Se o backend avisar que já foi visitado, recarrega o estado para bloquear a UI
+      if (err?.message?.includes('já foi visitado') && typeof recarregar === 'function') {
+        await recarregar();
+      }
       setFeedback({ variant: 'error', message: err?.message || 'Erro ao registrar visita.' });
     }
   };
