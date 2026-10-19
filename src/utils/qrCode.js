@@ -1,49 +1,82 @@
-// src/utils/qrCode.js
-
 const URL_PREFIX = 'https://frontend-senai-go.vercel.app/sala/';
 const CUSTOM_PREFIX = 'senaigo:sala:';
 
 /**
- * Extrai o identificador da sala (ID ou Nome) lido da câmera do celular.
+ * Converte o valor para um identificador de sala válido (número ou texto).
+ * EXPORTADA para evitar erros de importação no Home.jsx
+ */
+export const toSalaId = (value) => {
+  if (value === null || value === undefined || value === '') return null;
+
+  if (typeof value === 'object') {
+    value = value.salaId ?? value.id ?? value._id ?? value.id_sala ?? value.sala ?? value.nome;
+  }
+
+  if (value === null || value === undefined || value === '') return null;
+
+  const n = Number(value);
+  if (!isNaN(n) && Number.isInteger(n) && n > 0) {
+    return n;
+  }
+
+  return String(value).trim();
+};
+
+/**
+ * Gera a string gravada no QR Code.
+ */
+export const buildQrPayload = (salaOrId) => {
+  const id = toSalaId(salaOrId);
+
+  if (!id) {
+    console.warn('[QR Code] Não foi possível obter o ID da sala:', salaOrId);
+    return '';
+  }
+
+  return `${URL_PREFIX}${id}`;
+};
+
+/**
+ * Extrai o identificador da sala lido pelo scanner da câmara.
  */
 export const parseQrPayload = (text) => {
   const content = String(text || '').trim();
   if (!content) return null;
 
-  // 1. Tenta extrair de URL (ex: https://frontend-senai-go.vercel.app/sala/1 ou /sala/eletro)
+  // 1. Extração de URL (ex: https://frontend-senai-go.vercel.app/sala/1)
   try {
     const match = content.match(/\/sala\/([^/?]+)/i);
     if (match && match[1]) {
-      return decodeURIComponent(match[1]);
+      return toSalaId(decodeURIComponent(match[1]));
     }
   } catch { /* ignora */ }
 
-  // 2. Tenta extrair do prefixo antigo (ex: "senaigo:sala:1" ou "senaigo:sala:eletro")
+  // 2. Extração de prefixo personalizado ("senaigo:sala:1")
   if (content.toLowerCase().startsWith(CUSTOM_PREFIX)) {
-    return content.slice(CUSTOM_PREFIX.length).trim();
+    return toSalaId(content.slice(CUSTOM_PREFIX.length).trim());
   }
 
-  // 3. Tenta extrair de JSON (ex: {"salaId": 1} ou {"sala": "eletro"})
+  // 3. Extração de JSON
   if (content.startsWith('{')) {
     try {
       const data = JSON.parse(content);
-      return data.salaId ?? data.id ?? data.sala ?? data.nome ?? null;
+      return toSalaId(data);
     } catch {
       return null;
     }
   }
 
-  // 4. Tenta extrair de parâmetro da URL (ex: ?salaId=1 ou ?id=1)
+  // 4. Extração de query params (?salaId=1 ou ?id=1)
   try {
     const url = new URL(content);
     const fromQuery = url.searchParams.get('salaId') || url.searchParams.get('id');
-    if (fromQuery) return fromQuery;
+    if (fromQuery) return toSalaId(fromQuery);
   } catch { /* ignora */ }
 
-  // 5. Fallback: Se for apenas o ID ou nome direto (ex: "1" ou "eletro")
+  // 5. Fallback para texto/ID simples
   if (content.length > 0 && !content.includes('http')) {
-    return content;
+    return toSalaId(content);
   }
 
   return null;
-}
+};
