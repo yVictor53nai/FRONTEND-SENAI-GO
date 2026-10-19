@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import * as salasService from '../services/salasService';
 import * as visitasService from '../services/visitasService';
@@ -84,6 +84,7 @@ export const ProgressoProvider = ({ children }) => {
     }
   }, []);
 
+  // Mapeia todas as salas lidas padronizadas em String[cite: 1]
   const visitedRooms = useMemo(() => {
     const rawVisitedIds = visits.map((v) => {
       const idEncontrado = v?.sala_id ?? v?.salaId ?? v?.id_sala ?? v?.id ?? getRoomId(v);
@@ -142,25 +143,6 @@ export const ProgressoProvider = ({ children }) => {
   );
 
   return <ProgressoContext.Provider value={value}>{children}</ProgressoContext.Provider>;
-};
-
-// Exportação compatível com export default e export nomeado para evitar tela branca
-export const useProgresso = () => {
-  const context = useContext(ProgressoContext);
-  if (!context) {
-    return {
-      salas: [],
-      visitedRooms: [],
-      saldo: 0,
-      pontosGanhos: 0,
-      loading: false,
-      error: '',
-      recarregar: () => {},
-      registrarVisita: async () => {},
-      atualizarSaldo: async () => {},
-    };
-  }
-  return context;
 };
 
 export default ProgressoContext;
