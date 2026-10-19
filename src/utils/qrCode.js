@@ -46,4 +46,4 @@ export const parseQrPayload = (text) => {
   }
 
   return null;
-};
+}
