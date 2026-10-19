@@ -4,11 +4,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "qrcodes": "node scripts/gerar-qrcodes.mjs"
-  },
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+  "qrcodes": "node scripts/gerar-qrcodes.mjs"
+},
   "dependencies": {
     "axios": "^1.20.0",
     "jsqr": "^1.4.0",

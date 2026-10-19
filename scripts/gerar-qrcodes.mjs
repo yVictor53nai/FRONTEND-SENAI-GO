@@ -3,12 +3,21 @@ import path from 'node:path';
 import QRCode from 'qrcode';
 import { buildQrPayload } from '../src/utils/qrCode.js';
 
-try { process.loadEnvFile('.env'); } catch { /* .env opcional */ }
+// Carrega o .env sem quebrar o build na Vercel (onde process.loadEnvFile pode não existir)
+try {
+  if (typeof process.loadEnvFile === 'function') {
+    process.loadEnvFile('.env');
+  }
+} catch {
+  /* ignora se o arquivo .env não existir */
+}
 
 const apiUrl = (process.argv[2] || process.env.VITE_API_URL || '').replace(/\/+$/, '');
+
+// Se for um build automático (como na Vercel) e não houver URL de API rodando, encerra suavemente (exit 0)
 if (!apiUrl.startsWith('http')) {
-  console.error('Informe a URL da API: npm run qrcodes -- http://localhost:3000');
-  process.exit(1);
+  console.log('ℹ️ Nenhuma URL de API válida fornecida. Ignorando geração de QR codes estáticos no build.');
+  process.exit(0);
 }
 
 const slug = (text) =>
@@ -20,30 +29,35 @@ const slug = (text) =>
 
 let salas;
 try {
-  salas = await (await fetch(`${apiUrl}/salas`)).json();
-} catch {
-  console.error(`Não foi possível acessar ${apiUrl}/salas. A API está rodando?`);
-  process.exit(1);
+  const response = await fetch(`${apiUrl}/salas`);
+  if (!response.ok) throw new Error(`Status ${response.status}`);
+  salas = await response.json();
+} catch (err) {
+  console.error(`Não foi possível acessar ${apiUrl}/salas:`, err.message);
+  // Encerra com 0 para não travar o deploy da Vercel caso a API backend esteja offline durante a compilação
+  process.exit(0);
 }
 
 const outDir = path.resolve('qrcodes');
 await mkdir(outDir, { recursive: true });
 
-for (const item of salas) {
-  const id = item.salaId ?? item.id ?? item._id ?? item.id_sala;
-  const nome = item.sala ?? item.nome ?? item.nomeSala ?? `sala-${id}`;
+if (Array.isArray(salas)) {
+  for (const item of salas) {
+    const id = item.salaId ?? item.id ?? item._id ?? item.id_sala;
+    const nome = item.sala ?? item.nome ?? item.nomeSala ?? `sala-${id}`;
 
-  if (!id) {
-    console.warn('⚠️ Registo ignorado por falta de ID válido:', item);
-    continue;
+    if (!id) {
+      console.warn('⚠️ Registro ignorado por falta de ID válido:', item);
+      continue;
+    }
+
+    const file = path.join(outDir, `sala-${id}-${slug(nome)}.png`);
+    await QRCode.toFile(file, buildQrPayload(item), {
+      width: 600,
+      margin: 2,
+      errorCorrectionLevel: 'M'
+    });
+
+    console.log(`✓ ${nome} -> ${path.relative(process.cwd(), file)}`);
   }
-
-  const file = path.join(outDir, `sala-${id}-${slug(nome)}.png`);
-  await QRCode.toFile(file, buildQrPayload(id), {
-    width: 600,
-    margin: 2,
-    errorCorrectionLevel: 'M'
-  });
-
-  console.log(`✓ ${nome} -> ${path.relative(process.cwd(), file)}`);
 }
