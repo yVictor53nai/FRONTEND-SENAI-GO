@@ -1,36 +1,27 @@
 import React from 'react';
-import { QrCode, CheckCircle2 } from 'lucide-react';
-import Button from '../Button/Button';
+import { QrCode, CheckCircle } from 'lucide-react';
 import styles from './ScannerButton.module.css';
 
-const ScannerButton = ({
-  isVisited = false,
-  onClick,
-  disabled = false,
-  label = 'Escanear QR Code',
-  visitedLabel = 'Visitado',
-  ...props
-}) => {
-  if (isVisited) {
-    return (
-      <div className={styles.visitedBadge} role="status" aria-live="polite">
-        <CheckCircle2 size={18} className={styles.checkIcon} />
-        <span>{visitedLabel}</span>
-      </div>
-    );
-  }
-
+const ScannerButton = ({ isVisited, onClick, disabled }) => {
   return (
-    <Button
-      variant="primary"
-      fullWidth
+    <button
+      type="button"
+      className={`${styles.button} ${isVisited ? styles.buttonVisited : ''}`}
       onClick={onClick}
-      disabled={disabled}
-      icon={QrCode}
-      {...props}
+      disabled={disabled || isVisited} // Bloqueia o clique se já foi visitado[cite: 1]
     >
-      {label}
-    </Button>
+      {isVisited ? (
+        <>
+          <CheckCircle size={18} />
+          <span>Já lido ✔️</span>
+        </>
+      ) : (
+        <>
+          <QrCode size={18} />
+          <span>Escanear QR Code</span>
+        </>
+      )}
+    </button>
   );
 };
 
