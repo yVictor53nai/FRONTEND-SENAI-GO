@@ -15,8 +15,37 @@ import styles from './Home.module.css';
 
 const CLOSE_DELAY_MS = 1400;
 
-// Extrai o ID da sala
-const getRoomId = (item) => String(toSalaId(item) ?? item?.sala_id ?? item?.salaId ?? item?.id ?? '');
+// Extrai o ID da sala de forma segura
+const getRoomId = (item) => toSalaId(item) ?? item?.sala_id ?? item?.salaId ?? item?.id ?? item?._id ?? item?.id_sala;
+
+// Função ultra-flexível para verificar se o item já consta nas visitas
+const isRoomVisited = (visitedRooms, item, salas) => {
+  if (!Array.isArray(visitedRooms) || !item) return false;
+
+  const idDaSala = String(getRoomId(item) || '');
+  const nomeDaSala = String(item.sala ?? item.nome ?? '').toLowerCase().trim();
+
+  return visitedRooms.some((v) => {
+    const vStr = String(v).toLowerCase().trim();
+    
+    // 1. Checa por ID idêntico
+    if (idDaSala && vStr === idDaSala.toLowerCase()) return true;
+
+    // 2. Checa por Nome de sala idêntico (ex: "eletro")
+    if (nomeDaSala && vStr === nomeDaSala) return true;
+
+    // 3. Se v for um objeto de visita completo do banco
+    if (typeof v === 'object' && v !== null) {
+      const vSalaId = String(v.sala_id ?? v.salaId ?? v.id ?? '');
+      const vSalaNome = String(v.sala ?? v.nome ?? '').toLowerCase().trim();
+
+      if (idDaSala && vSalaId === idDaSala) return true;
+      if (nomeDaSala && vSalaNome === nomeDaSala) return true;
+    }
+
+    return false;
+  });
+};
 
 const Home = () => {
   const { salas, visitedRooms, registrarVisita, loading, error, recarregar } = useProgresso();
@@ -27,8 +56,7 @@ const Home = () => {
   useEffect(() => () => clearTimeout(closeTimer.current), []);
 
   const handleOpenScanner = (sala) => {
-    const roomId = getRoomId(sala);
-    const isAlreadyVisited = visitedRooms.includes(roomId);
+    const isAlreadyVisited = isRoomVisited(visitedRooms, sala, salas);
 
     if (isAlreadyVisited) {
       setFeedback({ variant: 'warning', message: 'Esta sala já foi visitada!' });
@@ -46,18 +74,20 @@ const Home = () => {
   }, []);
 
   const handleDetect = async (text) => {
-    const scannedId = String(parseQrPayload(text) || '');
+    const scannedPayload = parseQrPayload(text);
 
-    if (!scannedId) {
+    if (!scannedPayload) {
       setFeedback({ variant: 'warning', message: 'Este QR Code não pertence ao SENAIgo.' });
       return;
     }
 
-    // Procura a sala correspondente
+    // Procura a sala correspondente na lista pelo ID ou pelo Nome
     const salaLida = salas.find((item) => {
-      const rId = getRoomId(item);
-      const rName = String(item.sala ?? item.nome ?? '').toLowerCase();
-      return rId === scannedId || rName === scannedId.toLowerCase();
+      const roomId = String(getRoomId(item) || '');
+      const roomName = String(item.sala ?? item.nome ?? '').toLowerCase().trim();
+      const payloadStr = String(scannedPayload).toLowerCase().trim();
+
+      return roomId === payloadStr || roomName === payloadStr;
     });
 
     if (!salaLida) {
@@ -68,8 +98,8 @@ const Home = () => {
     const selectedRoomId = getRoomId(selectedRoom);
     const scannedRoomId = getRoomId(salaLida);
 
-    // Validação de segurança caso tenha aberto o modal de outra sala
-    if (selectedRoomId && scannedRoomId !== selectedRoomId) {
+    // Validação se escaneou o QR Code da sala certa
+    if (selectedRoom && selectedRoomId && String(scannedRoomId) !== String(selectedRoomId)) {
       const nomeSalaLida = salaLida.sala ?? salaLida.nome ?? 'outra área';
       const nomeSalaEsperada = selectedRoom?.sala ?? selectedRoom?.nome ?? 'área selecionada';
       setFeedback({
@@ -79,8 +109,8 @@ const Home = () => {
       return;
     }
 
-    // Bloqueia se já tiver sido visitada
-    if (visitedRooms.includes(scannedRoomId)) {
+    // Impede leitura dupla se já visitou
+    if (isRoomVisited(visitedRooms, salaLida, salas)) {
       setFeedback({
         variant: 'warning',
         message: `A sala "${salaLida.sala || salaLida.nome}" já foi visitada por você!`,
@@ -91,20 +121,29 @@ const Home = () => {
     setFeedback({ variant: 'info', message: 'QR Code lido! Registrando sua visita...' });
 
     try {
-      // 1. Envia a visita ao backend
-      await registrarVisita({ salaId: scannedRoomId });
+      const targetIdParaEnvio = scannedRoomId ?? scannedPayload;
+      await registrarVisita({ salaId: targetIdParaEnvio });
+
+      if (typeof recarregar === 'function') {
+        await recarregar();
+      }
 
       setFeedback({
         variant: 'success',
         message: `Visita registrada com sucesso! +${salaLida.pontos || 5} pontos.`,
       });
 
-      // Fecha o modal do scanner
       closeTimer.current = setTimeout(handleCloseScanner, CLOSE_DELAY_MS);
     } catch (err) {
+      if (typeof recarregar === 'function') {
+        await recarregar();
+      }
       setFeedback({ variant: 'error', message: err?.message || 'Erro ao registrar visita.' });
     }
   };
+
+  // Quantidade total de salas visitadas para o progresso
+  const totalSalasVisitadas = salas.filter((s) => isRoomVisited(visitedRooms, s, salas)).length;
 
   return (
     <div className={styles.pageContainer}>
@@ -131,7 +170,7 @@ const Home = () => {
           </div>
           <div className={styles.progressCard}>
             <ProgressBar
-              current={visitedRooms.length}
+              current={totalSalasVisitadas}
               total={salas.length}
               label="Progresso de Visitas"
             />
@@ -142,8 +181,8 @@ const Home = () => {
           <h3 className={styles.sectionTitle}>Áreas Disponíveis para Leitura</h3>
           <div className={styles.gridCards}>
             {salas.map((item) => {
-              const roomId = getRoomId(item);
-              const isVisited = visitedRooms.includes(roomId);
+              const roomId = getRoomId(item) || item.sala || item.nome;
+              const isVisited = isRoomVisited(visitedRooms, item, salas);
               const RoomIcon = getSalaIcon(item.icone);
               const nomeSala = item.sala ?? item.nome ?? 'Sala';
 
