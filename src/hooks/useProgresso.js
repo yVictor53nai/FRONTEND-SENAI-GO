@@ -5,6 +5,8 @@ import * as visitasService from '../services/visitasService';
 import * as saldoService from '../services/saldoService';
 import { ApiError } from '../services/api';
 import { toSalaId } from '../utils/qrCode';
+// src/hooks/useProgresso.jsx (ou .js)
+export { useProgresso, ProgressoProvider } from '../context/ProgressoContext';
 
 export const ProgressoContext = createContext(null);
 
