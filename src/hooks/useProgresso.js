@@ -12,19 +12,30 @@ export const useProgresso = () => {
     setError(null);
     try {
       const resSalas = await api.get('/salas');
-      const listaSalas = Array.isArray(resSalas.data) ? resSalas.data : [];
+      
+      // Trata respostas em formato de array ou de objeto com propriedade .data
+      const rawData = resSalas.data;
+      const listaSalas = Array.isArray(rawData) 
+        ? rawData 
+        : (rawData?.salas && Array.isArray(rawData.salas) ? rawData.salas : []);
 
-      // FILTRO ROBUSTO: Considera ativa se não for explicitamente desativada
-      const salasAtivas = listaSalas.filter((s) => {
-        const flagAtiva = s.ativa ?? s.ativo ?? s.is_active ?? s.status ?? true;
-        return flagAtiva !== false && flagAtiva !== 0 && String(flagAtiva).toLowerCase() !== 'false';
+      // Filtra apenas se a sala tiver explicitamente uma flag de desativada
+      const salasValidas = listaSalas.filter((s) => {
+        if (!s) return false;
+        const status = s.ativa ?? s.ativo ?? s.is_active ?? s.status;
+        return status !== false && status !== 0 && String(status).toLowerCase() !== 'false';
       });
 
-      setSalas(salasAtivas);
+      setSalas(salasValidas);
 
       const resVisitas = await api.get('/locais');
-      if (Array.isArray(resVisitas.data)) {
-        const ids = resVisitas.data.map((item) =>
+      const visitasData = resVisitas.data;
+      const listaVisitas = Array.isArray(visitasData)
+        ? visitasData
+        : (visitasData?.visitedRooms && Array.isArray(visitasData.visitedRooms) ? visitasData.visitedRooms : []);
+
+      if (Array.isArray(listaVisitas)) {
+        const ids = listaVisitas.map((item) =>
           String(item.sala_id ?? item.salaId ?? item.id ?? item)
         );
         setVisitedRooms(ids);
