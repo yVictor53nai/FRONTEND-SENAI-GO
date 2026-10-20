@@ -1,22 +1,21 @@
-import { useContext } from 'react';
-import { ProgressoContext } from '../context/ProgressoContext';
+import api from '../services/api';
 
-export const useProgresso = () => {
-  const context = useContext(ProgressoContext);
-  if (!context) {
-    return {
-      salas: [],
-      visitedRooms: [],
-      saldo: 0,
-      pontosGanhos: 0,
-      loading: false,
-      error: '',
-      recarregar: () => {},
-      registrarVisita: async () => {},
-      atualizarSaldo: async () => {},
+export const registrarVisita = async ({ salaId }) => {
+  try {
+    // Garante que o salaId vai como String ou Número limpo
+    const payload = { 
+      salaId: String(salaId).trim() 
     };
-  }
-  return context;
-};
 
-export default useProgresso;
+    const response = await api.post('/locais/registrarLocal', payload, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Erro no registrarVisita:', error);
+    throw error;
+  }
+};
