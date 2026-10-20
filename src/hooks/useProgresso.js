@@ -12,7 +12,13 @@ export const useProgresso = () => {
     setError(null);
     try {
       const resSalas = await api.get('/salas');
-      setSalas(Array.isArray(resSalas.data) ? resSalas.data : []);
+      const listaSalas = Array.isArray(resSalas.data) ? resSalas.data : [];
+
+      // FILTRO: Garante que salas desativadas (ativa === false/0) fiquem de fora do contador e da lista
+      const salasAtivas = listaSalas.filter(
+        (s) => s.ativa !== false && s.ativa !== 0 && s.ativa !== 'false'
+      );
+      setSalas(salasAtivas);
 
       const resVisitas = await api.get('/locais');
       if (Array.isArray(resVisitas.data)) {
