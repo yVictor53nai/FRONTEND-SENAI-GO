@@ -94,6 +94,11 @@ const Home = () => {
       // 1. Envia a visita ao backend
       await registrarVisita({ salaId: scannedRoomId });
 
+      // 2. Recarrega os dados para alterar o status para "Visitado" instantaneamente na tela
+      if (typeof recarregar === 'function') {
+        await recarregar();
+      }
+
       setFeedback({
         variant: 'success',
         message: `Visita registrada com sucesso! +${salaLida.pontos || 5} pontos.`,
