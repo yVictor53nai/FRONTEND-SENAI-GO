@@ -11,14 +11,14 @@ export const useProgresso = () => {
     setLoading(true);
     setError(null);
     try {
-      // 1. Busca todas as salas
+      // 1. Procura a lista de todas as salas disponíveis
       const resSalas = await api.get('/salas');
       setSalas(Array.isArray(resSalas.data) ? resSalas.data : []);
 
-      // 2. Busca o histórico de visitas do usuário logado
+      // 2. Procura o histórico de visitas do utilizador autenticado
       const resVisitas = await api.get('/locais');
       if (Array.isArray(resVisitas.data)) {
-        // Converte todos os IDs para String para garantir a comparação
+        // Normaliza os IDs para String para garantir a comparação no React
         const ids = resVisitas.data.map((item) =>
           String(item.sala_id ?? item.salaId ?? item.id ?? item)
         );
@@ -26,7 +26,7 @@ export const useProgresso = () => {
       }
     } catch (err) {
       console.error('Erro ao carregar progresso:', err);
-      setError(err?.message || 'Erro ao carregar dados.');
+      setError(err?.message || 'Erro ao carregar dados do servidor.');
     } finally {
       setLoading(false);
     }
@@ -38,23 +38,31 @@ export const useProgresso = () => {
 
   const registrarVisita = async ({ salaId }) => {
     try {
-      const payload = { salaId: String(salaId).trim() };
-      
+      const idFormatado = String(salaId).trim();
+
+      // Envia os dois formatos (salaId e id) no body para garantir compatibilidade total com os middlewares do BackEnd
+      const payload = { 
+        salaId: idFormatado,
+        id: idFormatado 
+      };
+
       const response = await api.post('/locais/registrarLocal', payload, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      // Se a API retornar a lista atualizada de salas visitadas, salva no estado local
+      // Se a API devolver a lista atualizada de salas visitadas, atualiza o estado local imediatamente
       if (response.data?.visitedRooms && Array.isArray(response.data.visitedRooms)) {
         setVisitedRooms(response.data.visitedRooms.map(String));
       } else {
-        // Fallback: recarrega do banco
+        // Caso contrário, recarrega os dados do banco
         await carregarDados();
       }
 
       return response.data;
     } catch (err) {
-      console.error('Erro ao registrar visita:', err);
+      console.error('Erro detalhado ao registrar visita:', err);
       throw err;
     }
   };
@@ -69,5 +77,4 @@ export const useProgresso = () => {
   };
 };
 
-// Export padrão também para garantir compatibilidade completa
 export default useProgresso;
