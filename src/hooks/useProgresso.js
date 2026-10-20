@@ -11,14 +11,13 @@ export const useProgresso = () => {
     setLoading(true);
     setError(null);
     try {
-      // 1. Procura a lista de todas as salas disponíveis
+      // 1. Procura a lista de salas
       const resSalas = await api.get('/salas');
       setSalas(Array.isArray(resSalas.data) ? resSalas.data : []);
 
-      // 2. Procura o histórico de visitas do utilizador autenticado
+      // 2. Procura as visitas efetuadas pelo utilizador
       const resVisitas = await api.get('/locais');
       if (Array.isArray(resVisitas.data)) {
-        // Normaliza os IDs para String para garantir a comparação no React
         const ids = resVisitas.data.map((item) =>
           String(item.sala_id ?? item.salaId ?? item.id ?? item)
         );
@@ -40,23 +39,22 @@ export const useProgresso = () => {
     try {
       const idFormatado = String(salaId).trim();
 
-      // Envia os dois formatos (salaId e id) no body para garantir compatibilidade total com os middlewares do BackEnd
+      // Envia na rota raiz de /locais para garantir correspondência com as rotas do Express
       const payload = { 
         salaId: idFormatado,
         id: idFormatado 
       };
 
-      const response = await api.post('/locais/registrarLocal', payload, {
+      const response = await api.post('/locais', payload, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      // Se a API devolver a lista atualizada de salas visitadas, atualiza o estado local imediatamente
+      // Atualiza o estado imediatamente com os novos IDs visitados
       if (response.data?.visitedRooms && Array.isArray(response.data.visitedRooms)) {
         setVisitedRooms(response.data.visitedRooms.map(String));
       } else {
-        // Caso contrário, recarrega os dados do banco
         await carregarDados();
       }
 
