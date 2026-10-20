@@ -53,7 +53,6 @@ const Home = () => {
       return;
     }
 
-    // Procura a sala correspondente
     const salaLida = salas.find((item) => {
       const rId = getRoomId(item);
       const rName = String(item.sala ?? item.nome ?? '').toLowerCase();
@@ -68,7 +67,6 @@ const Home = () => {
     const selectedRoomId = getRoomId(selectedRoom);
     const scannedRoomId = getRoomId(salaLida);
 
-    // Validação de segurança caso tenha aberto o modal de outra sala
     if (selectedRoomId && scannedRoomId !== selectedRoomId) {
       const nomeSalaLida = salaLida.sala ?? salaLida.nome ?? 'outra área';
       const nomeSalaEsperada = selectedRoom?.sala ?? selectedRoom?.nome ?? 'área selecionada';
@@ -79,7 +77,7 @@ const Home = () => {
       return;
     }
 
-    // LAPPADAN TI DUPLICADO: Bloqueia imediatamente se já tiver sido visitada
+    // BLOQUEIO TOTAL NO FRONTEND
     if (visitedRooms.includes(scannedRoomId)) {
       setFeedback({
         variant: 'warning',
@@ -91,23 +89,20 @@ const Home = () => {
     setFeedback({ variant: 'info', message: 'QR Code lido! Registrando sua visita...' });
 
     try {
-      // 1. Envia a visita ao backend
       await registrarVisita({ salaId: scannedRoomId });
-
-      // 2. Recarrega os dados para alterar o status para "Visitado" instantaneamente na tela
-      if (typeof recarregar === 'function') {
-        await recarregar();
-      }
 
       setFeedback({
         variant: 'success',
         message: `Visita registrada com sucesso! +${salaLida.pontos || 5} pontos.`,
       });
 
-      // Fecha o modal do scanner
       closeTimer.current = setTimeout(handleCloseScanner, CLOSE_DELAY_MS);
     } catch (err) {
-      setFeedback({ variant: 'error', message: err?.message || 'Erro ao registrar visita.' });
+      setFeedback({ 
+        variant: 'warning', 
+        message: 'Esta sala já foi visitada ou processada anteriormente!' 
+      });
+      closeTimer.current = setTimeout(handleCloseScanner, CLOSE_DELAY_MS);
     }
   };
 

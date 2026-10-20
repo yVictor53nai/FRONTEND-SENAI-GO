@@ -11,11 +11,9 @@ export const useProgresso = () => {
     setLoading(true);
     setError(null);
     try {
-      // 1. Procura a lista de salas
       const resSalas = await api.get('/salas');
       setSalas(Array.isArray(resSalas.data) ? resSalas.data : []);
 
-      // 2. Procura as visitas efetuadas pelo utilizador
       const resVisitas = await api.get('/locais');
       if (Array.isArray(resVisitas.data)) {
         const ids = resVisitas.data.map((item) =>
@@ -36,29 +34,30 @@ export const useProgresso = () => {
   }, [carregarDados]);
 
   const registrarVisita = async ({ salaId }) => {
-    try {
-      const idFormatado = String(salaId).trim();
+    const idFormatado = String(salaId).trim();
 
+    try {
       const payload = { 
         salaId: idFormatado,
         id: idFormatado 
       };
 
       const response = await api.post('/locais', payload, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
+
+      // Atualização imediata do estado local
+      setVisitedRooms((prev) => Array.from(new Set([...prev, idFormatado])));
 
       if (response.data?.visitedRooms && Array.isArray(response.data.visitedRooms)) {
         setVisitedRooms(response.data.visitedRooms.map(String));
-      } else {
-        await carregarDados();
       }
 
       return response.data;
     } catch (err) {
       console.error('Erro detalhado ao registrar visita:', err);
+      // Se der erro por já ser visitada, garante que o ID continua marcado no FrontEnd
+      setVisitedRooms((prev) => Array.from(new Set([...prev, idFormatado])));
       throw err;
     }
   };
