@@ -39,7 +39,6 @@ export const useProgresso = () => {
     try {
       const idFormatado = String(salaId).trim();
 
-      // Envia na rota raiz de /locais para garantir correspondência com as rotas do Express
       const payload = { 
         salaId: idFormatado,
         id: idFormatado 
@@ -51,7 +50,6 @@ export const useProgresso = () => {
         },
       });
 
-      // Atualiza o estado imediatamente com os novos IDs visitados
       if (response.data?.visitedRooms && Array.isArray(response.data.visitedRooms)) {
         setVisitedRooms(response.data.visitedRooms.map(String));
       } else {
