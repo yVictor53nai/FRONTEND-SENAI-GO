@@ -1,10 +1,6 @@
 const URL_PREFIX = 'https://frontend-senai-go.vercel.app/sala/';
 const CUSTOM_PREFIX = 'senaigo:sala:';
 
-/**
- * Converte o valor para um identificador de sala válido (número ou texto).
- * EXPORTADA para evitar erros de importação no Home.jsx
- */
 export const toSalaId = (value) => {
   if (value === null || value === undefined || value === '') return null;
 
@@ -22,9 +18,6 @@ export const toSalaId = (value) => {
   return String(value).trim();
 };
 
-/**
- * Gera a string gravada no QR Code.
- */
 export const buildQrPayload = (salaOrId) => {
   const id = toSalaId(salaOrId);
 
@@ -36,16 +29,13 @@ export const buildQrPayload = (salaOrId) => {
   return `${URL_PREFIX}${id}`;
 };
 
-/**
- * Extrai o identificador da sala lido pelo scanner da câmara.
- */
 export const parseQrPayload = (text) => {
   const content = String(text || '').trim();
   if (!content) return null;
 
   // 1. Extração de URL (ex: https://frontend-senai-go.vercel.app/sala/1)
   try {
-    const match = content.match(/\/sala\/([^/?]+)/i);
+    const match = content.match(/\/sala\/([^/?#]+)/i);
     if (match && match[1]) {
       return toSalaId(decodeURIComponent(match[1]));
     }
@@ -73,8 +63,8 @@ export const parseQrPayload = (text) => {
     if (fromQuery) return toSalaId(fromQuery);
   } catch { /* ignora */ }
 
-  // 5. Fallback para texto/ID simples
-  if (content.length > 0 && !content.includes('http')) {
+  // 5. Fallback para texto/ID simples (ex: "1" ou "eletro")
+  if (content.length > 0) {
     return toSalaId(content);
   }
 
