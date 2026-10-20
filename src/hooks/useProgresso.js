@@ -14,10 +14,12 @@ export const useProgresso = () => {
       const resSalas = await api.get('/salas');
       const listaSalas = Array.isArray(resSalas.data) ? resSalas.data : [];
 
-      // FILTRO: Garante que salas desativadas (ativa === false/0) fiquem de fora do contador e da lista
-      const salasAtivas = listaSalas.filter(
-        (s) => s.ativa !== false && s.ativa !== 0 && s.ativa !== 'false'
-      );
+      // FILTRO ROBUSTO: Considera ativa se não for explicitamente desativada
+      const salasAtivas = listaSalas.filter((s) => {
+        const flagAtiva = s.ativa ?? s.ativo ?? s.is_active ?? s.status ?? true;
+        return flagAtiva !== false && flagAtiva !== 0 && String(flagAtiva).toLowerCase() !== 'false';
+      });
+
       setSalas(salasAtivas);
 
       const resVisitas = await api.get('/locais');
@@ -52,7 +54,6 @@ export const useProgresso = () => {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      // Atualização imediata do estado local
       setVisitedRooms((prev) => Array.from(new Set([...prev, idFormatado])));
 
       if (response.data?.visitedRooms && Array.isArray(response.data.visitedRooms)) {
@@ -62,7 +63,6 @@ export const useProgresso = () => {
       return response.data;
     } catch (err) {
       console.error('Erro detalhado ao registrar visita:', err);
-      // Se der erro por já ser visitada, garante que o ID continua marcado no FrontEnd
       setVisitedRooms((prev) => Array.from(new Set([...prev, idFormatado])));
       throw err;
     }

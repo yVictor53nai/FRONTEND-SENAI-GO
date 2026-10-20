@@ -15,7 +15,6 @@ import styles from './Home.module.css';
 
 const CLOSE_DELAY_MS = 1400;
 
-// Extrai o ID da sala
 const getRoomId = (item) => String(toSalaId(item) ?? item?.sala_id ?? item?.salaId ?? item?.id ?? '');
 
 const Home = () => {
@@ -77,7 +76,6 @@ const Home = () => {
       return;
     }
 
-    // BLOQUEIO TOTAL NO FRONTEND
     if (visitedRooms.includes(scannedRoomId)) {
       setFeedback({
         variant: 'warning',
@@ -106,6 +104,8 @@ const Home = () => {
     }
   };
 
+  const totalSalasAtivas = salas.length;
+
   return (
     <div className={styles.pageContainer}>
       <Header />
@@ -132,7 +132,7 @@ const Home = () => {
           <div className={styles.progressCard}>
             <ProgressBar
               current={visitedRooms.length}
-              total={salas.length}
+              total={totalSalasAtivas}
               label="Progresso de Visitas"
             />
           </div>
