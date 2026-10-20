@@ -31,7 +31,7 @@ const Home = () => {
     const isAlreadyVisited = visitedRooms.includes(roomId);
 
     if (isAlreadyVisited) {
-      setFeedback({ variant: 'warning', message: 'Esta sala já foi visitada!' });
+      setFeedback({ variant: 'warning', message: 'Esta sala já foi visitada por você!' });
       return;
     }
 
@@ -79,7 +79,7 @@ const Home = () => {
       return;
     }
 
-    // Bloqueia se já tiver sido visitada
+    // LAPPADAN TI DUPLICADO: Bloqueia imediatamente se já tiver sido visitada
     if (visitedRooms.includes(scannedRoomId)) {
       setFeedback({
         variant: 'warning',
