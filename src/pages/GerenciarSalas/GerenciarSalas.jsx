@@ -12,6 +12,9 @@ import { getSalaIcon } from '../../constants/salaIcons';
 import { Plus, Pencil, Trash2, QrCode, RefreshCw } from 'lucide-react';
 import styles from '../GerenciarLoja/GerenciarLoja.module.css';
 
+// Função auxiliar para obter o ID com segurança, independentemente do formato do BD
+const getSalaId = (sala) => sala?.sala_id ?? sala?.salaId ?? sala?.id;
+
 const GerenciarSalas = () => {
   const { salas, loading, error, recarregar, cadastrar, atualizar, remover } = useSalasAdmin();
 
@@ -25,17 +28,25 @@ const GerenciarSalas = () => {
   const abrirNova = () => { setSalaEmEdicao(null); setFormAberto(true); };
   const abrirEdicao = (sala) => { setSalaEmEdicao(sala); setFormAberto(true); };
 
-  // Erros são lançados de volta para o formulário exibir a mensagem da API.
   const handleSalvar = async (dados) => {
-    const resposta = salaEmEdicao ? await atualizar(salaEmEdicao.salaId, dados) : await cadastrar(dados);
+    const id = getSalaId(salaEmEdicao);
+    const resposta = salaEmEdicao ? await atualizar(id, dados) : await cadastrar(dados);
     setFeedback({ variant: 'success', message: resposta.sucesso });
     setFormAberto(false);
   };
 
   const handleRemover = async () => {
+    const id = getSalaId(salaParaRemover);
+    
+    if (!id) {
+      setFeedback({ variant: 'error', message: 'ID da sala é inválido ou não foi encontrado.' });
+      setSalaParaRemover(null);
+      return;
+    }
+
     setRemovendo(true);
     try {
-      const resposta = await remover(salaParaRemover.salaId);
+      const resposta = await remover(id);
       setFeedback({ variant: 'success', message: resposta.sucesso });
     } catch (err) {
       setFeedback({ variant: 'error', message: err.message });
@@ -70,9 +81,10 @@ const GerenciarSalas = () => {
 
         <ul className={styles.list}>
           {salas.map((sala) => {
+            const id = getSalaId(sala);
             const Icon = getSalaIcon(sala.icone);
             return (
-              <li key={sala.salaId}>
+              <li key={id ?? sala.sala}>
                 <Card className={styles.row}>
                   <Icon size={30} />
                   <div className={styles.info}>
@@ -100,4 +112,5 @@ const GerenciarSalas = () => {
     </div>
   );
 };
+
 export default GerenciarSalas;
