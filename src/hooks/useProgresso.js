@@ -11,35 +11,32 @@ export const useProgresso = () => {
     setLoading(true);
     setError(null);
     try {
+      // 1. Busca todas as salas
       const resSalas = await api.get('/salas');
-      
-      // Trata respostas em formato de array ou de objeto com propriedade .data
-      const rawData = resSalas.data;
-      const listaSalas = Array.isArray(rawData) 
-        ? rawData 
-        : (rawData?.salas && Array.isArray(rawData.salas) ? rawData.salas : []);
+      const rawSalas = Array.isArray(resSalas.data) ? resSalas.data : [];
 
-      // Filtra apenas se a sala tiver explicitamente uma flag de desativada
-      const salasValidas = listaSalas.filter((s) => {
-        if (!s) return false;
+      // Filtra estritamente APENAS as salas ATIVAS
+      const salasAtivas = rawSalas.filter((s) => {
         const status = s.ativa ?? s.ativo ?? s.is_active ?? s.status;
-        return status !== false && status !== 0 && String(status).toLowerCase() !== 'false';
+        return status === true || status === 1 || String(status).toLowerCase() === 'true';
       });
 
-      setSalas(salasValidas);
+      setSalas(salasAtivas);
 
+      // Conjunto de IDs das salas ativas
+      const idsSalasAtivas = new Set(
+        salasAtivas.map((s) => String(s.sala_id ?? s.salaId ?? s.id))
+      );
+
+      // 2. Busca as visitas e FILTRA apenas as visitas de salas que estão ATIVAS
       const resVisitas = await api.get('/locais');
-      const visitasData = resVisitas.data;
-      const listaVisitas = Array.isArray(visitasData)
-        ? visitasData
-        : (visitasData?.visitedRooms && Array.isArray(visitasData.visitedRooms) ? visitasData.visitedRooms : []);
+      const rawVisitas = Array.isArray(resVisitas.data) ? resVisitas.data : [];
 
-      if (Array.isArray(listaVisitas)) {
-        const ids = listaVisitas.map((item) =>
-          String(item.sala_id ?? item.salaId ?? item.id ?? item)
-        );
-        setVisitedRooms(ids);
-      }
+      const visitasValidas = rawVisitas
+        .map((item) => String(item.sala_id ?? item.salaId ?? item.id ?? item))
+        .filter((id) => idsSalasAtivas.has(id));
+
+      setVisitedRooms(visitasValidas);
     } catch (err) {
       console.error('Erro ao carregar progresso:', err);
       setError(err?.message || 'Erro ao carregar dados do servidor.');
@@ -68,7 +65,13 @@ export const useProgresso = () => {
       setVisitedRooms((prev) => Array.from(new Set([...prev, idFormatado])));
 
       if (response.data?.visitedRooms && Array.isArray(response.data.visitedRooms)) {
-        setVisitedRooms(response.data.visitedRooms.map(String));
+        // Atualiza garantindo que apenas salas ativas fiquem na contagem
+        const idsSalasAtivas = new Set(salas.map((s) => String(s.sala_id ?? s.salaId ?? s.id)));
+        const visitadasFiltradas = response.data.visitedRooms
+          .map(String)
+          .filter((id) => idsSalasAtivas.has(id));
+
+        setVisitedRooms(visitadasFiltradas);
       }
 
       return response.data;
